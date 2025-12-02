@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-dark-50 text-dark-800 antialiased;
+  }
+  
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #0ea5e9 #27272a;
+  }
+  
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  *::-webkit-scrollbar-track {
+    background: #27272a;
+  }
+  
+  *::-webkit-scrollbar-thumb {
+    background-color: #0ea5e9;
+    border-radius: 20px;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-dark-100/50 backdrop-blur-lg border border-dark-200/50 rounded-xl shadow-xl;
+  }
+  
+  .btn-primary {
+    @apply px-6 py-3 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300;
+  }
+  
+  .btn-secondary {
+    @apply px-6 py-3 bg-dark-200 text-dark-800 font-semibold rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-3 bg-dark-100 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-dark-800;
+  }
+  
+  .card-3d {
+    @apply transition-all duration-300 hover:scale-105;
+    transform-style: preserve-3d;
+  }
+  
+  .card-3d:hover {
+    transform: perspective(1000px) rotateY(5deg) rotateX(5deg);
+  }
+}
+
+/* 3D perspective container */
+.perspective-container {
+  perspective: 1000px;
+}
+
+/* Glow effect */
+.glow-effect {
+  box-shadow: 0 0 30px rgba(14, 165, 233, 0.5);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}

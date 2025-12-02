@@ -1,0 +1,10 @@
+# Frontend-specific ignores (parent .gitignore handles most)
+node_modules/
+dist/
+.env
+.env.local
+.env.production
+src/config/credentials.js
+
+# Keep config folder structure
+!src/config/credentials.template.js

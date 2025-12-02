@@ -1,0 +1,12 @@
+# Backend-specific ignores (parent .gitignore handles most)
+node_modules/
+uploads/
+*.log
+.env
+config/credentials.js
+
+# Keep uploads folder structure
+!uploads/.gitkeep
+!uploads/profile/.gitkeep
+!uploads/projects/.gitkeep
+!uploads/skills/.gitkeep
