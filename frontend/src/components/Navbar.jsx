@@ -1,11 +1,30 @@
 import { useState, useEffect } from 'react';
 import { Menu, X, Home, User, Briefcase, Mail, Code } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import api from '../utils/api';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
+  const [profileName, setProfileName] = useState('Portfolio');
+
+  // Fetch profile name
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await api.get('/profile');
+        if (response.data?.name) {
+          setProfileName(response.data.name);
+          // Update page title
+          document.title = `${response.data.name} - Portfolio`;
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      }
+    };
+    fetchProfile();
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -63,7 +82,7 @@ const Navbar = () => {
             <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center glow-effect">
               <User className="w-6 h-6 text-white" />
             </div>
-            <span className="text-xl md:text-2xl font-bold gradient-text hidden sm:block">Portfolio</span>
+            <span className="text-xl md:text-2xl font-bold gradient-text hidden sm:block">{profileName}</span>
           </motion.div>
 
           {/* Desktop Menu */}
