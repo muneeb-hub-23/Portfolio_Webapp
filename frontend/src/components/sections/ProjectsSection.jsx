@@ -52,6 +52,40 @@ const ProjectsSection = ({ projects }) => {
 
           {/* Projects Container */}
           <div className={`relative ${needsScroll ? 'cursor-grab active:cursor-grabbing' : ''}`}>
+            {/* Mobile: Scrollable with snap, Desktop: Continuous animation */}
+            <div className="md:hidden">
+              <div className="overflow-x-auto scrollbar-hide px-4 -mx-4">
+                <div className="flex gap-4 snap-x snap-mandatory pb-8">
+                  {projects.map((project, index) => (
+                    <div key={project.id} className="snap-center flex-shrink-0 w-[85vw]">
+                      <ProjectCard
+                        project={project}
+                        index={index}
+                        onClick={() => setSelectedProject(project)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Mobile scroll hint */}
+              {projects.length > 1 && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="flex justify-center gap-2 mt-4"
+                >
+                  {projects.map((_, index) => (
+                    <div
+                      key={index}
+                      className="w-2 h-2 rounded-full bg-primary-500/30"
+                    />
+                  ))}
+                </motion.div>
+              )}
+            </div>
+
+            {/* Desktop: Original behavior */}
             <motion.div
               ref={constraintsRef}
               drag={needsScroll ? "x" : false}
@@ -68,7 +102,7 @@ const ProjectsSection = ({ projects }) => {
                   ease: "linear",
                 },
               } : {}}
-              className={`flex gap-6 md:gap-8 pb-8 px-4 ${!needsScroll ? 'justify-center' : ''}`}
+              className={`hidden md:flex gap-6 md:gap-8 pb-8 px-4 ${!needsScroll ? 'justify-center' : ''}`}
             >
               {displayProjects.map((project, index) => (
                 <ProjectCard
@@ -110,11 +144,8 @@ const ProjectCard = ({ project, index, onClick }) => {
   };
 
   const handleVideoSwipe = () => {
-    // Hide video, show it at the end after delay
+    // Hide video permanently, show images on top
     setVideoVisible(false);
-    setTimeout(() => {
-      setVideoVisible(true);
-    }, 300);
   };
 
   const handleCardClick = (e) => {
@@ -131,12 +162,12 @@ const ProjectCard = ({ project, index, onClick }) => {
       transition={{ duration: 0.5, delay: index * 0.1 }}
       whileHover={{ scale: 1.02 }}
       onClick={handleCardClick}
-      className="flex-shrink-0 w-80 md:w-96 cursor-pointer"
+      className="flex-shrink-0 w-full md:w-80 lg:w-96 cursor-pointer h-full"
     >
       <div className="glass-card overflow-hidden h-full hover:shadow-2xl transition-all duration-300 rounded-2xl">
         {/* Image/Video Section with Playing Card Stack Effect */}
         <div className="relative h-64 md:h-72 overflow-visible bg-dark-100 p-4">
-          {hasVideo && currentImages.length > 0 ? (
+          {hasVideo && videoVisible && currentImages.length > 0 ? (
             // Video on top with images behind (images are draggable)
             <div className="relative w-full h-full" style={{ transformStyle: 'preserve-3d' }}>
               {/* Background images (up to 3, draggable) */}
@@ -163,13 +194,34 @@ const ProjectCard = ({ project, index, onClick }) => {
               })}
               
               {/* Video on top (draggable) */}
-              {videoVisible && (
-                <DraggableVideo
-                  videoUrl={project.video_link}
-                  projectName={project.name}
-                  onSwipe={handleVideoSwipe}
-                />
-              )}
+              <DraggableVideo
+                videoUrl={project.video_link}
+                projectName={project.name}
+                onSwipe={handleVideoSwipe}
+              />
+            </div>
+          ) : hasVideo && !videoVisible && currentImages.length > 0 ? (
+            // Video was thrown away, show images on top now
+            <div className="relative w-full h-full" style={{ transformStyle: 'preserve-3d' }}>
+              {currentImages.slice(0, Math.min(3, currentImages.length)).reverse().map((img, idx) => {
+                const imgIndex = Math.min(2, currentImages.length - 1) - idx;
+                const offset = imgIndex * 6; // Normal offset for images
+                const rotation = imgIndex * 3;
+                
+                return (
+                  <DraggableImage
+                    key={img.id}
+                    image={img}
+                    projectName={project.name}
+                    imgIndex={imgIndex}
+                    offset={offset}
+                    rotation={rotation}
+                    zIndex={3 - imgIndex}
+                    onSwipe={() => handleImageSwipe(img.id)}
+                    delay={idx * 0.1}
+                  />
+                );
+              })}
             </div>
           ) : currentImages.length > 0 ? (
             // Stacked images like playing cards (draggable)
@@ -194,18 +246,21 @@ const ProjectCard = ({ project, index, onClick }) => {
                 );
               })}
             </div>
-          ) : hasVideo ? (
-            // Only video, no images
-            <div className="relative w-full h-full rounded-xl overflow-hidden shadow-2xl">
-              <img
-                src={`https://img.youtube.com/vi/${extractYouTubeId(project.video_link)}/maxresdefault.jpg`}
-                alt={project.name}
-                className="w-full h-full object-cover"
+          ) : hasVideo && videoVisible ? (
+            // Only video, no images (draggable)
+            <div className="relative w-full h-full" style={{ transformStyle: 'preserve-3d' }}>
+              <DraggableVideo
+                videoUrl={project.video_link}
+                projectName={project.name}
+                onSwipe={handleVideoSwipe}
               />
-              <div className="absolute inset-0 flex items-center justify-center bg-black/40 hover:bg-black/30 transition-all">
-                <div className="w-16 h-16 rounded-full bg-white/95 flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
-                  <div className="w-0 h-0 border-t-8 border-t-transparent border-l-[14px] border-l-primary-500 border-b-8 border-b-transparent ml-1" />
-                </div>
+            </div>
+          ) : hasVideo && !videoVisible ? (
+            // Video thrown away, no images to show
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-dark-200 to-dark-300 rounded-xl shadow-xl">
+              <div className="text-center">
+                <Briefcase className="w-16 h-16 text-dark-500 opacity-50 mx-auto mb-2" />
+                <p className="text-dark-500 text-sm">Video removed</p>
               </div>
             </div>
           ) : (
