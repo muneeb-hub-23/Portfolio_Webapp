@@ -5,6 +5,7 @@ import SkillsSection from '../components/sections/SkillsSection';
 import ProjectsSection from '../components/sections/ProjectsSection';
 import ContactSection from '../components/sections/ContactSection';
 import api from '../utils/api';
+import { trackPageView } from '../utils/analytics';
 
 const LandingPage = () => {
   const [profile, setProfile] = useState(null);
@@ -14,6 +15,8 @@ const LandingPage = () => {
 
   useEffect(() => {
     fetchData();
+    // Track page view
+    trackPageView('/');
   }, []);
 
   const fetchData = async () => {

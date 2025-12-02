@@ -13,6 +13,7 @@ import {
   LogOut,
   LayoutDashboard,
   ExternalLink,
+  BarChart3,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -23,6 +24,7 @@ const AdminLayout = ({ children }) => {
 
   const menuItems = [
     { path: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { path: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
     { path: '/admin/profile', label: 'Profile', icon: User },
     { path: '/admin/skills', label: 'Skills', icon: Code },
     { path: '/admin/projects', label: 'Projects', icon: Briefcase },

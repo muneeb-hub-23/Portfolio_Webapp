@@ -42,6 +42,10 @@ const ProjectsManagement = () => {
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
+    if (files.length > 20) {
+      toast.error('Maximum 20 images allowed per project');
+      return;
+    }
     setFormData({ ...formData, images: files });
   };
 
@@ -51,8 +55,8 @@ const ProjectsManagement = () => {
     try {
       const data = new FormData();
       data.append('name', formData.name);
-      data.append('description', formData.description);
-      data.append('video_link', formData.video_link);
+      data.append('description', formData.description || '');
+      data.append('video_link', formData.video_link || '');
       data.append('display_order', formData.display_order);
       data.append('skill_ids', JSON.stringify(formData.skill_ids));
 
@@ -65,21 +69,18 @@ const ProjectsManagement = () => {
       });
 
       if (editingId) {
-        await api.put(`/projects/${editingId}`, data, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
+        await api.put(`/projects/${editingId}`, data);
         toast.success('Project updated successfully!');
       } else {
-        await api.post('/projects', data, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
+        await api.post('/projects', data);
         toast.success('Project added successfully!');
       }
 
       fetchData();
       resetForm();
     } catch (error) {
-      toast.error('Failed to save project');
+      console.error('Save project error:', error);
+      toast.error(error.response?.data?.message || 'Failed to save project');
     }
   };
 
@@ -215,7 +216,7 @@ const ProjectsManagement = () => {
 
               <div>
                 <label className="block text-sm font-medium text-dark-700 mb-2">
-                  Project Images
+                  Project Images (Max 20)
                 </label>
                 <div className="relative">
                   <input
@@ -237,6 +238,9 @@ const ProjectsManagement = () => {
                         : 'Click to upload images'}
                     </span>
                   </label>
+                  <p className="text-xs text-dark-500 mt-2">
+                    Max 20 images, 10MB each (JPEG, PNG, GIF, WebP)
+                  </p>
                 </div>
               </div>
 

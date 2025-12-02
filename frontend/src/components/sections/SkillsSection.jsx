@@ -1,21 +1,27 @@
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { useRef } from 'react';
+import { motion } from 'framer-motion';
+import { useRef, useEffect, useState } from 'react';
 import { Code } from 'lucide-react';
 import { config } from '../../config/credentials';
 
 const SkillsSection = ({ skills }) => {
-  const containerRef = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ['start end', 'end start'],
-  });
+  const constraintsRef = useRef(null);
+  const [containerWidth, setContainerWidth] = useState(0);
 
-  const x = useTransform(scrollYProgress, [0, 1], ['0%', '-20%']);
+  useEffect(() => {
+    if (constraintsRef.current) {
+      setContainerWidth(constraintsRef.current.scrollWidth);
+    }
+  }, [skills]);
 
   if (!skills || skills.length === 0) return null;
 
+  // Only duplicate if there are multiple skills to create continuous scroll effect
+  // For single skill, show it without duplication
+  const displaySkills = skills.length > 1 ? [...skills, ...skills, ...skills] : skills;
+  const shouldAnimate = skills.length > 1;
+
   return (
-    <section id="skills" className="py-20 md:py-32 overflow-hidden relative" ref={containerRef}>
+    <section id="skills" className="py-20 md:py-32 overflow-hidden relative">
       {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute w-64 h-64 bg-primary-500/10 rounded-full blur-3xl top-1/2 left-1/4 animate-float"></div>
@@ -43,15 +49,31 @@ const SkillsSection = ({ skills }) => {
           </p>
         </motion.div>
 
-        {/* Horizontal Scrolling Skills */}
-        <motion.div
-          style={{ x }}
-          className="flex gap-6 md:gap-8 pb-8 px-4"
-        >
-          {skills.map((skill, index) => (
-            <SkillCard key={skill.id} skill={skill} index={index} />
-          ))}
-        </motion.div>
+        {/* Draggable Scrolling Skills */}
+        <div className={`relative ${shouldAnimate ? 'cursor-grab active:cursor-grabbing' : ''}`}>
+          <motion.div
+            ref={constraintsRef}
+            drag={shouldAnimate ? "x" : false}
+            dragConstraints={shouldAnimate ? { left: -containerWidth / 3, right: 0 } : undefined}
+            dragElastic={0.1}
+            dragTransition={{ bounceStiffness: 300, bounceDamping: 30 }}
+            animate={shouldAnimate ? {
+              x: [0, -containerWidth / 3],
+            } : {}}
+            transition={shouldAnimate ? {
+              x: {
+                duration: 30,
+                repeat: Infinity,
+                ease: "linear",
+              },
+            } : {}}
+            className={`flex gap-6 md:gap-8 pb-8 px-4 ${!shouldAnimate ? 'justify-center' : ''}`}
+          >
+            {displaySkills.map((skill, index) => (
+              <SkillCard key={`${skill.id}-${index}`} skill={skill} index={index} />
+            ))}
+          </motion.div>
+        </div>
       </div>
     </section>
   );

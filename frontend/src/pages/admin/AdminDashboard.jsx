@@ -6,6 +6,7 @@ import SkillsManagement from '../../components/admin/SkillsManagement';
 import ProjectsManagement from '../../components/admin/ProjectsManagement';
 import ReviewsManagement from '../../components/admin/ReviewsManagement';
 import EmailJSConfig from '../../components/admin/EmailJSConfig';
+import Analytics from '../../components/admin/Analytics';
 
 const AdminDashboard = () => {
   return (
@@ -13,6 +14,7 @@ const AdminDashboard = () => {
       <Routes>
         <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/analytics" element={<Analytics />} />
         <Route path="/profile" element={<ProfileManagement />} />
         <Route path="/skills" element={<SkillsManagement />} />
         <Route path="/projects" element={<ProjectsManagement />} />

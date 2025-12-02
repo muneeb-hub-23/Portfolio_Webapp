@@ -111,7 +111,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Create project (protected)
-router.post('/', authMiddleware, upload.array('images', 10), async (req, res) => {
+router.post('/', authMiddleware, upload.array('images', 20), async (req, res) => {
   try {
     const { name, description, video_link, display_order, skill_ids } = req.body;
 
@@ -167,7 +167,7 @@ router.post('/', authMiddleware, upload.array('images', 10), async (req, res) =>
 });
 
 // Update project (protected)
-router.put('/:id', authMiddleware, upload.array('images', 10), async (req, res) => {
+router.put('/:id', authMiddleware, upload.array('images', 20), async (req, res) => {
   try {
     const { name, description, video_link, display_order, skill_ids, existing_images } = req.body;
 

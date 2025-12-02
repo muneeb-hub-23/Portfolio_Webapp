@@ -39,7 +39,7 @@ const SkillsManagement = () => {
     try {
       const data = new FormData();
       data.append('name', formData.name);
-      data.append('description', formData.description);
+      data.append('description', formData.description || '');
       data.append('display_order', formData.display_order);
       
       if (iconFile) {
@@ -47,20 +47,17 @@ const SkillsManagement = () => {
       }
 
       if (editingId) {
-        await api.put(`/skills/${editingId}`, data, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
+        await api.put(`/skills/${editingId}`, data);
         toast.success('Skill updated successfully!');
       } else {
-        await api.post('/skills', data, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
+        await api.post('/skills', data);
         toast.success('Skill added successfully!');
       }
       fetchSkills();
       resetForm();
     } catch (error) {
-      toast.error('Failed to save skill');
+      console.error('Save skill error:', error);
+      toast.error(error.response?.data?.message || 'Failed to save skill');
     }
   };
 

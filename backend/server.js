@@ -18,6 +18,7 @@ app.use('/api/skills', require('./routes/skills'));
 app.use('/api/projects', require('./routes/projects'));
 app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/emailjs', require('./routes/emailjs'));
+app.use('/api/analytics', require('./routes/analytics'));
 
 // Health check
 app.get('/api/health', (req, res) => {

@@ -48,19 +48,18 @@ const ProfileManagement = () => {
     try {
       const formData = new FormData();
       formData.append('name', profile.name);
-      formData.append('description', profile.description);
+      formData.append('description', profile.description || '');
       if (profile.picture instanceof File) {
         formData.append('picture', profile.picture);
       }
 
-      await api.put('/profile', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      await api.put('/profile', formData);
 
       toast.success('Profile updated successfully!');
       fetchProfile();
     } catch (error) {
-      toast.error('Failed to update profile');
+      console.error('Update profile error:', error);
+      toast.error(error.response?.data?.message || 'Failed to update profile');
     } finally {
       setLoading(false);
     }
