@@ -1,0 +1,6 @@
+🚀 Server is running on localhost:\\.\pipe\69acf2c6-e7ad-471a-b13a-dc8d6f4e6d64
+📍 Server URL: http://localhost:\\.\pipe\69acf2c6-e7ad-471a-b13a-dc8d6f4e6d64
+🌐 Running in IIS/hosted environment
+   - PORT source: PORT
+   - HOST source: config
+Database connected successfully!

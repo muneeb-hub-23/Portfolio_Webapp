@@ -1,0 +1,36 @@
+# IIS Node configuration for Portfolio Backend
+
+# Log settings
+loggingEnabled: true
+logDirectory: iisnode
+devErrorsEnabled: false
+
+# Node process settings  
+nodeProcessCountPerApplication: 1
+maxConcurrentRequestsPerProcess: 1024
+maxNamedPipeConnectionRetry: 24
+namedPipeConnectionRetryDelay: 250
+
+# Request handling
+asyncCompletionThreadCount: 0
+maxRequestLength: 30000000
+
+# Environment
+node_env: production
+
+# Enable debugging
+debuggingEnabled: false
+debuggerPortRange: 5058-6058
+debuggerPathSegment: debug
+
+# Process recycling
+recycleSignalEnabled: false
+gracefulShutdownTimeout: 60000
+
+# Error handling
+promoteServerVars: REMOTE_ADDR,AUTH_USER,LOGON_USER
+flushResponse: false
+enableXFF: true
+
+# Watch for file changes (disable in production)
+watchedFiles: *.js;iisnode.yml;web.config

@@ -7,6 +7,7 @@ import ProjectsManagement from '../../components/admin/ProjectsManagement';
 import ReviewsManagement from '../../components/admin/ReviewsManagement';
 import EmailJSConfig from '../../components/admin/EmailJSConfig';
 import Analytics from '../../components/admin/Analytics';
+import Settings from '../../components/admin/Settings';
 
 const AdminDashboard = () => {
   return (
@@ -20,6 +21,7 @@ const AdminDashboard = () => {
         <Route path="/projects" element={<ProjectsManagement />} />
         <Route path="/reviews" element={<ReviewsManagement />} />
         <Route path="/emailjs" element={<EmailJSConfig />} />
+        <Route path="/settings" element={<Settings />} />
       </Routes>
     </AdminLayout>
   );

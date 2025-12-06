@@ -1,0 +1,6 @@
+🚀 Server is running on 10.10.5.1:\\.\pipe\2e8c85f0-5756-465d-ab3c-dbda21a18471
+📍 Server URL: http://10.10.5.1:\\.\pipe\2e8c85f0-5756-465d-ab3c-dbda21a18471
+🌐 Running in IIS/hosted environment
+   - PORT source: PORT
+   - HOST source: config
+Database connected successfully!
