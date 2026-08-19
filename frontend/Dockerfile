@@ -5,8 +5,10 @@ WORKDIR /app
 # Build-time arguments forwarded from docker-compose (Vite reads VITE_* at build time)
 ARG VITE_API_URL=/api
 ARG VITE_BACKEND_URL=/api
+ARG VITE_UPLOADS_URL=
 ENV VITE_API_URL=$VITE_API_URL
 ENV VITE_BACKEND_URL=$VITE_BACKEND_URL
+ENV VITE_UPLOADS_URL=$VITE_UPLOADS_URL
 
 # Copy package files and install dependencies
 COPY package*.json ./
