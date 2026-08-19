@@ -3,7 +3,7 @@ import { X, Star, MessageCircle, Send } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import api from '../utils/api';
 import toast from 'react-hot-toast';
-import { config } from '../config/credentials';
+import { config } from '../config/credentials.template';
 
 const ProjectModal = ({ project, onClose }) => {
   const [reviews, setReviews] = useState([]);

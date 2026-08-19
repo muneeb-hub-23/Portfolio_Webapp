@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Edit2, Trash2, Save, X, Upload, Image as ImageIcon } from 'lucide-react';
 import api from '../../utils/api';
 import toast from 'react-hot-toast';
-import { config } from '../../config/credentials';
+import { config } from '../../config/credentials.template';
 
 const SkillsManagement = () => {
   const [skills, setSkills] = useState([]);

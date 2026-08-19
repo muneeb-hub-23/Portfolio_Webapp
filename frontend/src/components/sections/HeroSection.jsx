@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
-import { config } from '../../config/credentials';
+import { config } from '../../config/credentials.template';
 
 const HeroSection = ({ profile }) => {
   if (!profile) return null;

@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { useRef, useEffect, useState } from 'react';
 import { Code } from 'lucide-react';
-import { config } from '../../config/credentials';
+import { config } from '../../config/credentials.template';
 
 const SkillsSection = ({ skills }) => {
   const constraintsRef = useRef(null);

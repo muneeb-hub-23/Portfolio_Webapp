@@ -10,10 +10,30 @@ const PORT = process.env.PORT || process.env.IISNODE_PORT || config.server.port 
 const HOST = process.env.HOST || process.env.IISNODE_HOST || config.server.host || 'localhost';
 
 // Middleware
-app.use(cors());
+const allowedOrigins = [
+  "https://muneebbaig.info",
+  "https://www.muneebbaig.info"
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // allow requests with no origin (Postman, curl, mobile apps)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true // only if you use cookies/auth
+  })
+);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/uploads', express.static('uploads'));
+app.use('/api/uploads', express.static('uploads'));
 
 // Root route
 app.get('/', (req, res) => {

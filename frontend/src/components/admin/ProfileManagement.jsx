@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Save, Upload, User } from 'lucide-react';
 import api from '../../utils/api';
 import toast from 'react-hot-toast';
-import { config } from '../../config/credentials';
+import { config } from '../../config/credentials.template';
 
 const ProfileManagement = () => {
   const [profile, setProfile] = useState({

@@ -1,7 +1,7 @@
 import { motion, useMotionValue, useTransform } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
 import { Briefcase, Star, MessageCircle, ExternalLink } from 'lucide-react';
-import { config } from '../../config/credentials';
+import { config } from '../../config/credentials.template';
 import ProjectModal from '../ProjectModal';
 
 const ProjectsSection = ({ projects }) => {
