@@ -1,0 +1,14 @@
+node_modules
+npm-debug.log*
+.env
+config/credentials.js
+uploads/profile/*
+uploads/projects/*
+uploads/skills/*
+!uploads/profile/.gitkeep
+!uploads/projects/.gitkeep
+!uploads/skills/.gitkeep
+*.md
+.gitignore
+iisnode.yml
+web.config

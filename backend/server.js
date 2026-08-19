@@ -1,13 +1,16 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const config = require('./config/credentials');
+
+// Environment variables take precedence; fall back to credentials.js for local dev
+let config = { server: {} };
+try { config = require('./config/credentials'); } catch (_) {}
 
 const app = express();
 
 // Prioritize IIS provided port and host, fallback to config/defaults
 const PORT = process.env.PORT || process.env.IISNODE_PORT || config.server.port || 5000;
-const HOST = process.env.HOST || process.env.IISNODE_HOST || config.server.host || 'localhost';
+const HOST = process.env.HOST || process.env.IISNODE_HOST || config.server.host || '0.0.0.0';
 
 // Middleware
 const allowedOrigins = [

@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
 const db = require('../database/db');
-const config = require('../config/credentials');
+const jwtConfig = require('../config/jwtConfig');
 const authMiddleware = require('../middleware/auth');
 
 // Get social links (public)
@@ -91,8 +91,8 @@ router.post('/change-username', authMiddleware, async (req, res) => {
     // Generate new token with updated username
     const token = jwt.sign(
       { id: admin.id, username: newUsername },
-      config.jwt.secret,
-      { expiresIn: config.jwt.expiresIn }
+      jwtConfig.secret,
+      { expiresIn: jwtConfig.expiresIn }
     );
 
     res.json({ 

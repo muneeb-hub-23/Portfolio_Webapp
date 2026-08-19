@@ -82,3 +82,7 @@ frontend/src/config/credentials.js
 *.tmp
 *.temp
 .cache/
+
+# Docker
+.env
+docker-compose.override.yml

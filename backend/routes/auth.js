@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
 const db = require('../database/db');
-const config = require('../config/credentials');
+const jwtConfig = require('../config/jwtConfig');
 
 // Login route
 router.post('/login', async (req, res) => {
@@ -33,8 +33,8 @@ router.post('/login', async (req, res) => {
     // Create JWT token
     const token = jwt.sign(
       { id: admin.id, username: admin.username },
-      config.jwt.secret,
-      { expiresIn: config.jwt.expiresIn }
+      jwtConfig.secret,
+      { expiresIn: jwtConfig.expiresIn }
     );
 
     res.json({
@@ -58,7 +58,7 @@ router.post('/change-password', async (req, res) => {
       return res.status(401).json({ message: 'No token provided' });
     }
 
-    const decoded = jwt.verify(token, config.jwt.secret);
+    const decoded = jwt.verify(token, jwtConfig.secret);
     const { currentPassword, newPassword } = req.body;
 
     // Get current admin
