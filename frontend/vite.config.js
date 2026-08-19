@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import { copyFileSync } from 'fs'
+import { copyFileSync, existsSync } from 'fs'
 
 export default defineConfig({
   plugins: [
@@ -8,7 +8,10 @@ export default defineConfig({
     {
       name: 'copy-web-config',
       closeBundle() {
-        copyFileSync('web.config', 'dist/web.config')
+        // Only copy web.config when it exists (IIS deployments); skip in Docker
+        if (existsSync('web.config')) {
+          copyFileSync('web.config', 'dist/web.config')
+        }
       }
     }
   ],
