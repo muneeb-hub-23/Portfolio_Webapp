@@ -1,7 +1,7 @@
 export const config = {
   apiUrl: import.meta.env.VITE_API_URL || 'https://api.muneebbaig.info/api',
-  // Base URL prepended to /uploads/... paths stored in the DB.
-  // In Docker (nginx proxy): leave empty so /uploads/... resolves relative to the same origin.
-  // In IIS / direct-backend deployments: set to the backend origin, e.g. https://api.muneebbaig.info
-  backendUrl: import.meta.env.VITE_UPLOADS_URL ?? import.meta.env.VITE_BACKEND_URL ?? '',
+  // Origin prepended to /uploads/... image paths stored in the DB.
+  // Docker  → set VITE_UPLOADS_URL=  (empty) so nginx proxies /uploads/ on the same origin.
+  // IIS/dev → set VITE_UPLOADS_URL=https://api.muneebbaig.info  (no trailing slash, no /api)
+  backendUrl: import.meta.env.VITE_UPLOADS_URL || '',
 };
