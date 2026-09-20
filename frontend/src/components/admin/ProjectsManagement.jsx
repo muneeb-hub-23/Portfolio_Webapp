@@ -11,6 +11,9 @@ const ProjectsManagement = () => {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState('');
+  const [uploadPercent, setUploadPercent] = useState(0);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -46,11 +49,21 @@ const ProjectsManagement = () => {
       toast.error('Maximum 20 images allowed per project');
       return;
     }
-    setFormData({ ...formData, images: files });
+    if (files.some((file) => file.size > 10 * 1024 * 1024)) {
+      toast.error('Each image must be 10MB or smaller');
+      return;
+    }
+    setFormData((current) => ({ ...current, images: files, existing_images: files.length ? [] : current.existing_images }));
+    setUploadStatus('');
+    setUploadPercent(0);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (saving) return;
+    setSaving(true);
+    setUploadPercent(0);
+    setUploadStatus(formData.images.length ? `Uploading 0 of ${formData.images.length} images…` : 'Saving project…');
 
     try {
       const data = new FormData();
@@ -68,23 +81,48 @@ const ProjectsManagement = () => {
         data.append('images', image);
       });
 
+      const requestOptions = {
+        onUploadProgress: (event) => {
+          if (!event.total || !formData.images.length) return;
+          const percent = Math.min(100, Math.round((event.loaded / event.total) * 100));
+          const totalBytes = formData.images.reduce((sum, image) => sum + image.size, 0);
+          const uploadedBytes = Math.max(0, event.loaded - (event.total - totalBytes));
+          let completed = 0;
+          let bytes = 0;
+          for (const image of formData.images) {
+            bytes += image.size;
+            if (uploadedBytes >= bytes) completed++;
+          }
+          setUploadPercent(percent);
+          setUploadStatus(percent === 100 ? 'Upload sent. Waiting for server to save images…' : `Uploading ${completed} of ${formData.images.length} images (${percent}%)…`);
+        },
+      };
       if (editingId) {
-        await api.put(`/projects/${editingId}`, data);
+        await api.put(`/projects/${editingId}`, data, requestOptions);
         toast.success('Project updated successfully!');
       } else {
-        await api.post('/projects', data);
+        await api.post('/projects', data, requestOptions);
         toast.success('Project added successfully!');
       }
 
-      fetchData();
+      setUploadStatus('Saved successfully.');
+      await fetchData();
       resetForm();
     } catch (error) {
       console.error('Save project error:', error);
-      toast.error(error.response?.data?.message || 'Failed to save project');
+      const message = error.response?.data?.message || (error.response?.status === 413
+        ? 'Upload is too large for the server. Check the proxy upload limit.'
+        : 'Failed to save project. Check the server connection.');
+      setUploadStatus(`Upload failed: ${message}`);
+      toast.error(message);
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleEdit = (project) => {
+    setUploadStatus('');
+    setUploadPercent(0);
     setEditingId(project.id);
     setFormData({
       name: project.name,
@@ -111,6 +149,8 @@ const ProjectsManagement = () => {
   };
 
   const resetForm = () => {
+    setUploadStatus('');
+    setUploadPercent(0);
     setFormData({
       name: '',
       description: '',
@@ -147,7 +187,8 @@ const ProjectsManagement = () => {
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => setShowForm(!showForm)}
+          onClick={() => { if (!saving) { if (showForm) resetForm(); else setShowForm(true); } }}
+          disabled={saving}
           className="btn-primary flex items-center gap-2"
         >
           {showForm ? <X className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
@@ -224,6 +265,7 @@ const ProjectsManagement = () => {
                     multiple
                     accept="image/*"
                     onChange={handleImageChange}
+                    disabled={saving}
                     className="hidden"
                     id="project-images"
                   />
@@ -241,8 +283,20 @@ const ProjectsManagement = () => {
                   <p className="text-xs text-dark-500 mt-2">
                     Max 20 images, 10MB each (JPEG, PNG, GIF, WebP)
                   </p>
+                  {editingId && formData.images.length > 0 && (
+                    <p className="text-sm text-amber-500 mt-2">Saving will replace all previous images with the selected images.</p>
+                  )}
+                  {editingId && formData.images.length === 0 && formData.existing_images.length > 0 && (
+                    <p className="text-sm text-dark-500 mt-2">Current images: {formData.existing_images.length}. Select new images to replace them.</p>
+                  )}
                 </div>
               </div>
+              {uploadStatus && (
+                <div role="status" aria-live="polite" className="text-sm text-dark-700">
+                  <p>{uploadStatus}</p>
+                  {saving && formData.images.length > 0 && <progress className="w-full mt-2" value={uploadPercent} max="100" />}
+                </div>
+              )}
 
               <div>
                 <label className="block text-sm font-medium text-dark-700 mb-2">
@@ -285,13 +339,14 @@ const ProjectsManagement = () => {
               </div>
 
               <div className="flex gap-4">
-                <button type="submit" className="btn-primary flex-1">
+                <button type="submit" disabled={saving} className="btn-primary flex-1 disabled:opacity-50">
                   <Save className="w-4 h-4 inline mr-2" />
-                  {editingId ? 'Update Project' : 'Add Project'}
+                  {saving ? 'Uploading…' : editingId ? 'Update Project' : 'Add Project'}
                 </button>
                 <button
                   type="button"
                   onClick={resetForm}
+                  disabled={saving}
                   className="btn-secondary flex-1"
                 >
                   Cancel

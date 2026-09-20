@@ -6,6 +6,18 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
+const removeProjectFiles = async (images) => {
+  for (const image of images) {
+    const filename = path.basename(image.image_url || image.filename || '');
+    if (!filename) continue;
+    try {
+      await fs.promises.unlink(path.join('uploads', 'projects', filename));
+    } catch (error) {
+      if (error.code !== 'ENOENT') console.error('Remove project image error:', error);
+    }
+  }
+};
+
 // Configure multer for file upload
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -33,6 +45,16 @@ const upload = multer({
     cb(new Error('Only image files are allowed!'));
   }
 });
+
+const uploadProjectImages = (req, res, next) => {
+  upload.array('images', 20)(req, res, (error) => {
+    if (!error) return next();
+    const tooLarge = error.code === 'LIMIT_FILE_SIZE';
+    res.status(tooLarge ? 413 : 400).json({
+      message: tooLarge ? 'Each project image must be 10MB or smaller' : error.message,
+    });
+  });
+};
 
 // Get all projects (public)
 router.get('/', async (req, res) => {
@@ -111,7 +133,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Create project (protected)
-router.post('/', authMiddleware, upload.array('images', 20), async (req, res) => {
+router.post('/', authMiddleware, uploadProjectImages, async (req, res) => {
   try {
     const { name, description, video_link, display_order, skill_ids } = req.body;
 
@@ -167,31 +189,44 @@ router.post('/', authMiddleware, upload.array('images', 20), async (req, res) =>
 });
 
 // Update project (protected)
-router.put('/:id', authMiddleware, upload.array('images', 20), async (req, res) => {
+router.put('/:id', authMiddleware, uploadProjectImages, async (req, res) => {
+  let connection;
   try {
     const { name, description, video_link, display_order, skill_ids, existing_images } = req.body;
+    connection = await db.getConnection();
+    await connection.beginTransaction();
+    const [projectRows] = await connection.query('SELECT id FROM projects WHERE id = ? FOR UPDATE', [req.params.id]);
+    if (!projectRows.length) {
+      await connection.rollback();
+      await removeProjectFiles(req.files || []);
+      return res.status(404).json({ message: 'Project not found' });
+    }
+    const [previousImages] = await connection.query('SELECT id, image_url FROM project_images WHERE project_id = ?', [req.params.id]);
+    let removedImages = [];
 
     // Update project
     const query = 'UPDATE projects SET name = ?, description = ?, video_link = ?, display_order = ? WHERE id = ?';
-    await db.query(query, [name, description, video_link, display_order || 0, req.params.id]);
+    await connection.query(query, [name, description, video_link, display_order || 0, req.params.id]);
 
     // Handle images
-    if (existing_images) {
+    if (existing_images !== undefined || (req.files && req.files.length)) {
       // Delete images not in existing_images list
-      const existingImageArray = Array.isArray(existing_images) ? existing_images : JSON.parse(existing_images);
+      const existingImageArray = existing_images === undefined ? [] : Array.isArray(existing_images) ? existing_images : JSON.parse(existing_images);
+      const keptIds = new Set(existingImageArray.map(Number));
+      removedImages = previousImages.filter((image) => !keptIds.has(image.id));
       if (existingImageArray.length > 0) {
-        await db.query(
+        await connection.query(
           'DELETE FROM project_images WHERE project_id = ? AND id NOT IN (?)',
           [req.params.id, existingImageArray]
         );
       } else {
-        await db.query('DELETE FROM project_images WHERE project_id = ?', [req.params.id]);
+        await connection.query('DELETE FROM project_images WHERE project_id = ?', [req.params.id]);
       }
     }
 
     // Add new images
     if (req.files && req.files.length > 0) {
-      const [existingCount] = await db.query(
+      const [existingCount] = await connection.query(
         'SELECT COUNT(*) as count FROM project_images WHERE project_id = ?',
         [req.params.id]
       );
@@ -199,7 +234,7 @@ router.put('/:id', authMiddleware, upload.array('images', 20), async (req, res) 
 
       for (let i = 0; i < req.files.length; i++) {
         const imageUrl = `/uploads/projects/${req.files[i].filename}`;
-        await db.query(
+        await connection.query(
           'INSERT INTO project_images (project_id, image_url, display_order) VALUES (?, ?, ?)',
           [req.params.id, imageUrl, startOrder + i]
         );
@@ -207,11 +242,11 @@ router.put('/:id', authMiddleware, upload.array('images', 20), async (req, res) 
     }
 
     // Update project skills
-    await db.query('DELETE FROM project_skills WHERE project_id = ?', [req.params.id]);
+    await connection.query('DELETE FROM project_skills WHERE project_id = ?', [req.params.id]);
     if (skill_ids) {
       const skillArray = Array.isArray(skill_ids) ? skill_ids : JSON.parse(skill_ids);
       for (let skillId of skillArray) {
-        await db.query(
+        await connection.query(
           'INSERT INTO project_skills (project_id, skill_id) VALUES (?, ?)',
           [req.params.id, skillId]
         );
@@ -219,9 +254,9 @@ router.put('/:id', authMiddleware, upload.array('images', 20), async (req, res) 
     }
 
     // Get updated project with all data
-    const [updated] = await db.query('SELECT * FROM projects WHERE id = ?', [req.params.id]);
-    const [images] = await db.query('SELECT * FROM project_images WHERE project_id = ?', [req.params.id]);
-    const [skills] = await db.query(
+    const [updated] = await connection.query('SELECT * FROM projects WHERE id = ?', [req.params.id]);
+    const [images] = await connection.query('SELECT * FROM project_images WHERE project_id = ? ORDER BY display_order ASC', [req.params.id]);
+    const [skills] = await connection.query(
       `SELECT s.* FROM skills s 
        INNER JOIN project_skills ps ON s.id = ps.skill_id 
        WHERE ps.project_id = ?`,
@@ -231,10 +266,16 @@ router.put('/:id', authMiddleware, upload.array('images', 20), async (req, res) 
     updated[0].images = images;
     updated[0].skills = skills;
 
+    await connection.commit();
+    await removeProjectFiles(removedImages);
     res.json(updated[0]);
   } catch (error) {
+    if (connection) await connection.rollback();
+    await removeProjectFiles(req.files || []);
     console.error('Update project error:', error);
     res.status(500).json({ message: 'Server error' });
+  } finally {
+    if (connection) connection.release();
   }
 });
 
