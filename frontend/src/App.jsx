@@ -4,6 +4,7 @@ import LandingPage from './pages/LandingPage';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
+import CustomPage from './pages/CustomPage';
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="*" element={<CustomPage />} />
       </Routes>
     </Router>
   );

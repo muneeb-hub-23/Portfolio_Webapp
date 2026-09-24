@@ -14,6 +14,7 @@ const HOST = process.env.HOST || process.env.IISNODE_HOST || config.server.host 
 
 // Middleware
 app.use(cors({ origin: '*' }));
+app.use('/api/custom-pages', bodyParser.json({ limit: '2mb' }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/uploads', express.static('uploads'));
@@ -55,6 +56,7 @@ app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/emailjs', require('./routes/emailjs'));
 app.use('/api/analytics', require('./routes/analytics'));
 app.use('/api/settings', require('./routes/settings'));
+app.use('/api/custom-pages', require('./routes/customPages'));
 
 // Start server
 const startServer = async () => {

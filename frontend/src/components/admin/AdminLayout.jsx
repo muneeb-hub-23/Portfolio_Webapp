@@ -15,6 +15,7 @@ import {
   ExternalLink,
   BarChart3,
   Settings,
+  FileText,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -29,6 +30,7 @@ const AdminLayout = ({ children }) => {
     { path: '/admin/profile', label: 'Profile', icon: User },
     { path: '/admin/skills', label: 'Skills', icon: Code },
     { path: '/admin/projects', label: 'Projects', icon: Briefcase },
+    { path: '/admin/custom-pages', label: 'Custom Pages', icon: FileText },
     { path: '/admin/reviews', label: 'Reviews', icon: MessageCircle },
     { path: '/admin/emailjs', label: 'Email Config', icon: Mail },
     { path: '/admin/settings', label: 'Settings', icon: Settings },

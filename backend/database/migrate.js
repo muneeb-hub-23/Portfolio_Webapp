@@ -3,6 +3,8 @@ const db = require('./db');
 async function migrate() {
   try {
     console.log('Starting database migration...');
+    await db.query(require('fs').readFileSync(require('path').join(__dirname, 'migrations/add_custom_pages.sql'), 'utf8'));
+    console.log('✓ custom_pages table created/verified');
 
     // Create social_links table if not exists
     await db.query(`
